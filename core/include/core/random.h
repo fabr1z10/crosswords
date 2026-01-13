@@ -1,0 +1,1 @@
+int getRandomNumber(int max);

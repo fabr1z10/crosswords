@@ -1,0 +1,23 @@
+# build locations
+cmake-build-debug/
+/build/
+build/
+
+
+# Qt
+*.moc
+*.qrc
+*.ui~
+*.autosave
+
+# Compiled files
+*.o
+*.obj
+*.exe
+*.out
+*.app
+
+# IDEs
+.vscode/
+.idea/
+*.user
