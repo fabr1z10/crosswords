@@ -17,6 +17,8 @@ public:
 	void setPlayable(bool);
 
 	void setDefinitionLabel(QLabel*);
+
+	void addClue(Slot*, const std::string& clue);
 protected:
 	void mousePressEvent(QMouseEvent* event) override;
 
@@ -37,6 +39,8 @@ private:
 	float _cellSize;
 	std::shared_ptr<Grid> _grid;
 	QLabel* _definition = nullptr;
+	std::unordered_map<Slot*, std::string> _clues;
+
 };
 
 inline std::shared_ptr<Grid> Crossword::getGrid() const {

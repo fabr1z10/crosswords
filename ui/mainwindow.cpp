@@ -7,7 +7,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include "core/solver.h"
-
+#include <QApplication>
 
 namespace fs = std::filesystem;
 
@@ -15,34 +15,52 @@ void MainWindow::makeStatusBar() {
 	auto statusBar = new QStatusBar(this);
 	setStatusBar(statusBar);
 	_dictLabel = new QLabel("<No dictionary>");
-	_gridStatusLabel = new QLabel("Empty");
+	_gridStatusIcon = new QLabel(this);
+	_gridStatusLabel = new QLabel(this);
 	statusBar->addPermanentWidget(_dictLabel);
-	statusBar->addWidget(_gridStatusLabel);
+	statusBar->addPermanentWidget(_gridStatusIcon);
+	statusBar->addPermanentWidget(_gridStatusLabel);
+	setStatusOk();
+}
+
+void MainWindow::setStatusOk()
+{
+	_gridStatusIcon->setPixmap(
+			style()->standardIcon(QStyle::SP_DialogApplyButton).pixmap(16, 16)
+	);
+	_gridStatusLabel->setText("Ready");
+}
+
+void MainWindow::setStatusWorking()
+{
+	_gridStatusIcon->setPixmap(
+			style()->standardIcon(QStyle::SP_BrowserReload).pixmap(16, 16)
+	);
+	_gridStatusLabel->setText("Working...");
 }
 
 void MainWindow::generateCrossword() {
 	if (_crossword->getGrid() == nullptr) {
-
-		QMessageBox::critical(
-				this,                       // parent (usually MainWindow or Dialog)
-				tr("Error"),                 // title
-				tr("No crossword grid loaded.")  // message
-		);
+		QMessageBox::critical(this, tr("Error"), tr("No crossword grid loaded."));
 		return;
 	}
 	if (_dict == nullptr) {
-
-		QMessageBox::critical(
-				this,                       // parent (usually MainWindow or Dialog)
-				tr("Error"),                 // title
-				tr("No dictionary loaded.")  // message
-		);
+		QMessageBox::critical(this, tr("Error"), tr("No dictionary loaded."));
+	}
+	setStatusWorking();
+	QApplication::processEvents();
+	Solver solver;
+	auto grid = _crossword->getGrid();
+	solver.solve(*grid.get(), *_dict.get());
+	_crossword->setPlayable(true);
+	// get clues
+	for (const auto& c : grid->getSlots()) {
+		auto word = grid->getWord(c.get());
+		auto clue = _dict->getClue(word);
+		_crossword->addClue(c.get(), clue);
 	}
 
-	Solver solver;
-	solver.solve(*_crossword->getGrid().get(), *_dict.get());
-	_crossword->setPlayable(true);
-
+	setStatusOk();
 }
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)

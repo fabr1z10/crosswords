@@ -6,7 +6,6 @@
 #include <QLabel>
 #include "core/dict.h"
 
-
 class Crossword;
 
 class MainWindow : public QMainWindow {
@@ -16,6 +15,8 @@ public:
 	const std::vector<uint8_t>& getVol(int);
 	void generateCrossword();
 private:
+	void setStatusOk();
+	void setStatusWorking();
 	void makeStatusBar();
 	void loadLogic();
 	std::string readAGIVersionNumber();
@@ -37,6 +38,7 @@ private:
 	QLabel* _currentDefinition;
 	QLabel* _dictLabel;
 	QLabel* _gridStatusLabel;
+	QLabel* _gridStatusIcon;
 
 };
 

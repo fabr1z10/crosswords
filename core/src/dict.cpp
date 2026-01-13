@@ -4,7 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <set>
-#include <random>
+#include "core/random.h"
 #include <algorithm>
 
 struct SetSizeComparator {
@@ -49,14 +49,12 @@ Dictionary::Dictionary(const std::string& file) {
     // first get the unique words
     std::unordered_set<std::string> words;
     while (getline(fin, line)) {
-        stringstream ss(line);
-        std::string cell;
-        vector<string> s;
-        while (getline(ss, cell, ',')) {
-            s.push_back(cell);
-        }
 
-        words.insert(s[0]);
+		auto commaIndex = line.find(',');
+		auto word = line.substr(0, commaIndex);
+		auto clue = line.substr(commaIndex+1);
+        words.insert(word);
+		_clues[word].push_back(clue);
     }
 
     std::cout << "# words: " << words.size() << "\n";
@@ -125,4 +123,12 @@ std::unordered_set<std::string> DictN::intersectTwoSets(const std::unordered_set
 
 std::vector<std::string> Dictionary::find(const std::string &pattern) {
     return _subDicts[pattern.size() - 2].find(pattern);
+}
+
+std::string Dictionary::getClue(const std::string& word) const {
+	auto it = _clues.find(word);
+	if (it == _clues.end()) {
+		throw std::runtime_error(" -- Requested clue for a word (" + word + ") not in the dicitonary.");
+	}
+	return it->second[getRandomNumber(it->second.size()-1)];
 }

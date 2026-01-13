@@ -30,9 +30,11 @@ public:
 
 	int getWordCount() const;
 
+	std::string getClue(const std::string&) const;
 private:
     std::vector<DictN> _subDicts;
     std::vector<std::string> _words;
+	std::unordered_map<std::string, std::vector<std::string>> _clues;
 };
 
 inline int Dictionary::getWordCount() const {

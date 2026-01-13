@@ -57,7 +57,8 @@ void Crossword::mousePressEvent(QMouseEvent *event) {
 	if (_highlightedWord != nullptr) {
 		qDebug() << "Current slot: " << _highlightedWord->toString() << "; word = " << _grid->getWord(_highlightedWord) << "\n";
 		std::stringstream stream;
-		stream << _highlightedWord->number << " " << (_highlightedWord->d == Direction::ACROSS ? "orizzontale" : "verticale") << ": " << _grid->getWord(_highlightedWord);
+		stream << _highlightedWord->number << " " << (_highlightedWord->d == Direction::ACROSS ? "orizzontale" : "verticale") <<
+			": " << _clues.at(_highlightedWord) << " ... " << _grid->getWord(_highlightedWord);
 		clue = stream.str();
 	}
 	if (_definition) {
@@ -163,4 +164,8 @@ void Crossword::paintEvent(QPaintEvent *event) {
 	//ainter.drawText(qr, Qt.AlignCenter, letter)
 
 
+}
+
+void Crossword::addClue(Slot * slot, const std::string &clue) {
+	_clues[slot] = clue;
 }
