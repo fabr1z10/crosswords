@@ -69,6 +69,7 @@ public:
 	std::pair<int, int> getIntersection(int x, int y);
 	Slot* getAcross(int);
 	Slot* getDown(int);
+	std::string getLetters() const;
 private:
 	int _width;
 	int _height;
@@ -90,6 +91,10 @@ private:
 
 inline void Grid::addUnfeasibility(Slot * slot, const std::string & s) {
 	_unfeasibleSet[slot].insert(s);
+}
+
+inline std::string Grid::getLetters() const {
+	return _grid;
 }
 
 inline int Grid::getWidth() const {

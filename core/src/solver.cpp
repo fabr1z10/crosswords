@@ -3,7 +3,6 @@
 #include <stack>
 #include <algorithm>
 #include "core/random.h"
-#include "core/decision.h"
 
 
 
@@ -12,7 +11,8 @@
 
 
 
-void Solver::solve(Grid &g, Dictionary &dict) {
+
+void Solver::solve(Grid &g, Dictionary &dict, SeedMode mode, uint32_t seed) {
     // algorithm
 
     // starts with definition with most intersections
@@ -20,7 +20,7 @@ void Solver::solve(Grid &g, Dictionary &dict) {
 
     //std::stack<std::shared_ptr<Decision>> decisions;
 
-    DecisionTree tree(g, dict);
+    DecisionTree tree(g, dict, mode, seed);
     tree.process();
     //decisions.push(std::make_shared<Decision>(slot, g, dict));
 //    std::unordered_set<Slot*> decisionsStacked;

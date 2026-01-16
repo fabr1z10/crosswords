@@ -19,11 +19,21 @@ public:
 	void setDefinitionLabel(QLabel*);
 
 	void addClue(Slot*, const std::string& clue);
+
+	std::string getClue(Slot*) const;
 protected:
 	void mousePressEvent(QMouseEvent* event) override;
 
+	void keyPressEvent(QKeyEvent* event) override;
+
 	void paintEvent(QPaintEvent *event) override;
 private:
+	void updateClue();
+	void moveRight();
+	void moveLeft();
+	void moveUp();
+	void moveDown();
+
 	float _pad;
 	float _blackPad;
 	int _gridWidth = 0;
@@ -33,14 +43,14 @@ private:
 	QColor _cursorColor;
 	bool _playable = true;
 	Slot* _highlightedWord = nullptr;
-	QVector2D _cursorPos;
+	QPoint _cursorPos;
 	QVector2D _topLeft;
 	QVector2D _bottomRight;
 	float _cellSize;
 	std::shared_ptr<Grid> _grid;
 	QLabel* _definition = nullptr;
 	std::unordered_map<Slot*, std::string> _clues;
-
+	std::string _letters;
 };
 
 inline std::shared_ptr<Grid> Crossword::getGrid() const {

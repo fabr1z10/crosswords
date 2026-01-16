@@ -1,8 +1,15 @@
 #pragma once
 
+
+enum class SeedMode {
+	Random,
+	Fixed
+};
+
 #include "grid.h"
 #include "dict.h"
 #include <list>
+#include "core/random.h"
 
 //class Decision {
 //
@@ -67,7 +74,7 @@
 //}
 class DecisionTree {
 public:
-    DecisionTree(Grid& grid, Dictionary& dict);
+    DecisionTree(Grid& grid, Dictionary& dict, SeedMode mode, uint32_t seed = 0);
     // we should try to get the decision with the least words!
     //Decision* getNext();
     //void add(std::shared_ptr<Decision> decision, std::shared_ptr<Decision> parent);
@@ -83,6 +90,6 @@ private:
     //std::list<std::shared_ptr<Decision>> _leaves;
     //std::shared_ptr<Decision> _root;
     std::unordered_map<Slot*, std::vector<std::string>> _availableWords;
-
+	Random _rnd;
 };
 

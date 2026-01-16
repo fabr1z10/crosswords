@@ -1,12 +1,19 @@
 #include "core/random.h"
 #include <random>
 
-// Define random engine and device globally
-unsigned int seed=12345;
-std::random_device rd;
-std::mt19937 gen(seed); // Use Mersenne Twister engine
+Random::Random()
+{
+	std::random_device rd;
+	_engine.seed(rd());   // non-deterministic seed
+}
 
-int getRandomNumber(int max) {
-    std::uniform_int_distribution<> dist(0, max);
-    return dist(gen);
+Random::Random(std::uint32_t seed)
+		: _engine(seed)       // deterministic seed
+{
+}
+
+int Random::nextInt(int min, int max)
+{
+	std::uniform_int_distribution<int> dist(min, max);
+	return dist(_engine);
 }

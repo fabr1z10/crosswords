@@ -15,12 +15,124 @@ Crossword::Crossword(QWidget *parent) : QWidget(parent) {
 	pal.setColor(this->backgroundRole(), _bgColor);
 	setAutoFillBackground(true);
 	setPalette(pal);
+	setFocusPolicy(Qt::StrongFocus); // IMPORTANT
 }
 
 void Crossword::setGrid(std::shared_ptr<Grid> grid) {
 	_grid = grid;
 	_gridWidth = _grid->getWidth();
 	_gridHeight = _grid->getHeight();
+	_letters = _grid->getLetters(); // initialize letters
+}
+
+void Crossword::moveRight() {
+	if (1 + _cursorPos.x() - _highlightedWord->x < _highlightedWord->length) {
+		_cursorPos.rx() ++;
+	}
+}
+
+void Crossword::moveLeft() {
+	if (_cursorPos.x() - 1 >= _highlightedWord->x) {
+		_cursorPos.rx() --;
+	}
+}
+
+void Crossword::moveDown() {
+	if (1 + _cursorPos.y() - _highlightedWord->y < _highlightedWord->length) {
+		_cursorPos.ry()++;
+	}
+}
+
+void Crossword::moveUp() {
+	if (_cursorPos.y() - 1 >= _highlightedWord->y) {
+		_cursorPos.ry()--;
+	}
+}
+
+void Crossword::keyPressEvent(QKeyEvent *event) {
+	if (!_playable) return;
+	auto key = event->key();
+	if (_highlightedWord != nullptr) {
+		if (key >= 65 && key <= 90) {
+			_letters[_cursorPos.y() * _gridWidth + _cursorPos.x()] = char(key);
+			if (_highlightedWord->d == Direction::ACROSS) {
+				moveRight();
+			} else if (_highlightedWord->d == Direction::DOWN) {
+				moveDown();
+			}
+			repaint();
+		} else if (key == Qt::Key_Left) {
+			if (_highlightedWord->d == Direction::ACROSS) {
+				moveLeft();
+				repaint();
+			} else {
+				if (auto id = _grid->getIntersection(_cursorPos.x(), _cursorPos.y()); id.first != -1) {
+					_highlightedWord = _grid->getAcross(id.first);
+					moveLeft();
+					updateClue();
+					repaint();
+				}
+			}
+		} else if (key == Qt::Key_Right) {
+			if (_highlightedWord->d == Direction::ACROSS) {
+				moveRight();
+				repaint();
+			} else {
+				if (auto id = _grid->getIntersection(_cursorPos.x(), _cursorPos.y()); id.first != -1) {
+					_highlightedWord = _grid->getAcross(id.first);
+					moveRight();
+					updateClue();
+					repaint();
+				}
+			}
+		} else if (key == Qt::Key_Up) {
+			if (_highlightedWord->d == Direction::DOWN) {
+				moveUp();
+				repaint();
+			} else {
+				if (auto id = _grid->getIntersection(_cursorPos.x(), _cursorPos.y()); id.second != -1) {
+					_highlightedWord = _grid->getDown(id.second);
+					moveUp();
+					updateClue();
+					repaint();
+				}
+			}
+		} else if (key == Qt::Key_Down) {
+			if (_highlightedWord->d == Direction::DOWN) {
+				moveDown();
+				repaint();
+			} else {
+				if (auto id = _grid->getIntersection(_cursorPos.x(), _cursorPos.y()); id.second != -1) {
+					_highlightedWord = _grid->getDown(id.second);
+					moveDown();
+					updateClue();
+					repaint();
+				}
+			}
+		} else if (key == Qt::Key_Backspace) {
+			_letters[_cursorPos.y() * _gridWidth + _cursorPos.x()] = '.';
+			repaint();
+		}
+	}
+}
+
+void Crossword::updateClue() {
+	std::string clue;
+	if (_highlightedWord != nullptr) {
+		//qDebug() << "Current slot: " << _highlightedWord->toString() << "; word = " << _grid->getWord(_highlightedWord) << "\n";
+		std::stringstream stream;
+		stream << _highlightedWord->number << " " << (_highlightedWord->d == Direction::ACROSS ? "orizzontale" : "verticale") <<
+			   ": " << _grid->getWord(_highlightedWord);
+		auto it = _clues.find(_highlightedWord);
+
+		if (it != _clues.end()) {
+			stream << ": " << it->second;
+		}
+		clue = stream.str();
+	}
+	if (_definition) {
+		_definition->setText(QString::fromStdString(clue));
+	}
 }
 
 void Crossword::mousePressEvent(QMouseEvent *event) {
@@ -33,8 +145,8 @@ void Crossword::mousePressEvent(QMouseEvent *event) {
 	}
 	int col = int((pos.x() - _topLeft.x()) / _cellSize);
 	int row = int((pos.y() - _topLeft.y()) / _cellSize);
-	_cursorPos = QVector2D(col, row);
-	qDebug() << "x="<<  col << "y=" << row << "\n";
+	_cursorPos = QPoint(col, row);
+	//qDebug() << "x="<<  col << "y=" << row << "\n";
 	//acrossClue = _grid->get.grid.getAcross(row, col)
 	auto intersection = _grid->getIntersection(col, row);
 	if (intersection.first == -1 && intersection.second == -1) {
@@ -53,17 +165,7 @@ void Crossword::mousePressEvent(QMouseEvent *event) {
 			_highlightedWord = dSlot;
 		}
 	}
-	std::string clue;
-	if (_highlightedWord != nullptr) {
-		qDebug() << "Current slot: " << _highlightedWord->toString() << "; word = " << _grid->getWord(_highlightedWord) << "\n";
-		std::stringstream stream;
-		stream << _highlightedWord->number << " " << (_highlightedWord->d == Direction::ACROSS ? "orizzontale" : "verticale") <<
-			": " << _clues.at(_highlightedWord) << " ... " << _grid->getWord(_highlightedWord);
-		clue = stream.str();
-	}
-	if (_definition) {
-		_definition->setText(QString::fromStdString(clue));
-	}
+	updateClue();
 	repaint();
 }
 
@@ -157,8 +259,23 @@ void Crossword::paintEvent(QPaintEvent *event) {
 	}
 
 
-	//# place letters
-	//painter.setFont(QFont("arial", cell_size * 0.65))
+	// place letters
+	painter.setFont(QFont("arial", cell_size * 0.65));
+	for (int i = 0; i < _letters.size(); ++i) {
+		if (_letters[i] == '.' || _letters[i] == '#') continue;
+		int ix = i % _gridWidth;
+		int iy = (int) (i / _gridWidth);
+
+		auto r = QRect(
+			_topLeft.x() + ix * cell_size,
+			_topLeft.y() + iy * cell_size,
+			cell_size,
+			cell_size);
+
+		painter.drawText(r, Qt::AlignCenter, QString(_letters[i]));
+
+
+	}
 	//for pos, letter in self.letters.items():
 	//r = QRect(self.tl.x() + pos[0] * cell_size, self.tl.y() + pos[1] * cell_size, cell_size, cell_size)
 	//ainter.drawText(qr, Qt.AlignCenter, letter)
@@ -168,4 +285,8 @@ void Crossword::paintEvent(QPaintEvent *event) {
 
 void Crossword::addClue(Slot * slot, const std::string &clue) {
 	_clues[slot] = clue;
+}
+
+std::string Crossword::getClue(Slot* slot) const {
+	return _clues.at(slot);
 }

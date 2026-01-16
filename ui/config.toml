@@ -1,0 +1,7 @@
+[rng]
+deterministic = true
+seed = 12345
+
+[paths]
+schema_file = "/home/fabrizio/cw26/assets/schemi.yaml"
+default_dictionary = "/home/fabrizio/playground/crossword/dict/ita"

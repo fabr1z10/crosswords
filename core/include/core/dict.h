@@ -30,7 +30,7 @@ public:
 
 	int getWordCount() const;
 
-	std::string getClue(const std::string&) const;
+	const std::vector<std::string>& getClues(const std::string&) const;
 private:
     std::vector<DictN> _subDicts;
     std::vector<std::string> _words;

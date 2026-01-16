@@ -122,7 +122,8 @@ void DecisionTree::removeStringsAtPosition(std::vector<std::string>& vec, char c
     vec = std::move(result);  // Replace the original vector with the filtered result
 }
 
-DecisionTree::DecisionTree(Grid &grid, Dictionary &dict) : _grid(grid), _dict(dict) {
+DecisionTree::DecisionTree(Grid &grid, Dictionary &dict, SeedMode mode, uint32_t seed) : _grid(grid), _dict(dict),
+	_rnd(mode == SeedMode::Fixed ? Random(seed) : Random()) {
 
     auto slot = _grid.peekSlot();
     //add(std::make_shared<Decision>(slot, _grid, _dict), nullptr);
@@ -167,7 +168,7 @@ int DecisionTree::process() {
         std::cout << " Available words: " << words.size() << "\n";
         bool wordFound = false;
         while (!wordFound && !words.empty()) {
-            int randomIndex = getRandomNumber(words.size() - 1);
+            int randomIndex = _rnd.nextInt(0, words.size() - 1);
             std::string testWord = words[randomIndex];
             std::swap(words[randomIndex], words.back());
             words.pop_back();

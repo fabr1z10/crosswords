@@ -22,6 +22,7 @@ private:
 	std::string readAGIVersionNumber();
 	std::string hex(char);
 	void onOpen();
+	void onSave();
 	void onNew();
 	void onLoadDictionary();
 	void onTreeItemClicked(QTreeWidgetItem* item, int column);

@@ -125,10 +125,11 @@ std::vector<std::string> Dictionary::find(const std::string &pattern) {
     return _subDicts[pattern.size() - 2].find(pattern);
 }
 
-std::string Dictionary::getClue(const std::string& word) const {
-	auto it = _clues.find(word);
-	if (it == _clues.end()) {
-		throw std::runtime_error(" -- Requested clue for a word (" + word + ") not in the dicitonary.");
-	}
-	return it->second[getRandomNumber(it->second.size()-1)];
+const std::vector<std::string>& Dictionary::getClues(const std::string& word) const {
+	return _clues.at(word);
+	//auto it = _clues.find(word);
+	//if (it == _clues.end()) {
+	//	throw std::runtime_error(" -- Requested clue for a word (" + word + ") not in the dicitonary.");
+	//}
+	//return it->second[getRandomNumber(it->second.size()-1)];
 }
